@@ -1,8 +1,9 @@
 import pyautogui
 import time 
+import pydirectinput
 
 
-def operate_gamestart(pre_sleep):
+def operate_gamestart(pre_sleep, game_mode='1p'):
     """
     pre_sleep 为初始等待时间
     code = 0 -> 初始
@@ -10,6 +11,7 @@ def operate_gamestart(pre_sleep):
     code = -1 -> 大厅没找到
     code = -2 -> 开始按钮没找到
     code = -3 -> 接受按钮没找到
+    game_mode = '1p' or 'co'
     """
     print('Initializing: gamestart...')
     time.sleep(pre_sleep)
@@ -28,6 +30,17 @@ def operate_gamestart(pre_sleep):
         seeker_gem = pyautogui.locateOnScreen('.//pics//gem_icon.png', grayscale=True, confidence=0.8)
         pyautogui.click(seeker_gem, clicks=2, interval=1)
         
+        
+        for pic_name in ['race', '1p', 'co']:
+            seeker_menu = pyautogui.locateCenterOnScreen('.//pics//menu_%s.png'%(pic_name), grayscale=True, confidence=0.8)
+            if seeker_menu:
+                break
+            
+        if pic_name != game_mode:
+            pyautogui.click(seeker_menu, clicks=2, duration=1, interval=1)
+            seeker_sub = pyautogui.locateCenterOnScreen('.//pics//sub_%s.png'%(game_mode), grayscale=True, confidence=0.8)
+            pyautogui.click(seeker_sub, clicks=1, duration=1)
+          
         seeker_start = pyautogui.locateCenterOnScreen('.//pics//start.png', grayscale=True, confidence=0.8)
         if seeker_start:
             print('Start button found!')
@@ -96,54 +109,83 @@ def operate_ingame(pre_sleep):
 
 def operate_ag(pre_sleep):
     """
-    有点问题啊
+    自动打 -wtf, 并退出
     """
-    
     
     print('AG-ing...')
     time.sleep(pre_sleep)
+    operate_code = 0
     
-    pyautogui.press('enter')
+    pydirectinput.press('enter')
     time.sleep(1)
-    pyautogui.write('Hello world!')
+    pydirectinput.write('-wtf')
     time.sleep(1)
-    pyautogui.press('enter')
+    pydirectinput.press('enter', presses=2, interval=0.5)
     
-
-
-
+    # 然后等待退出按钮
+    time.sleep(8)
+    n_count = 0
+    
+    while n_count < 10:
+        seeker_exit = pyautogui.locateCenterOnScreen('.//pics//exit_ingame.png', grayscale=True, confidence=0.8)
+        n_count += 1
+        time.sleep(1)
+        if seeker_exit:
+            break
+        
+    if seeker_exit:
+        print('Exit success!')
+        pyautogui.click(seeker_exit, clicks=1, duration=1)
+        operate_code = 1
+    else:
+        print('Exit failed')
+        operate_code = -1
+        
+    return operate_code
+    
+    
 if __name__ == '__main__':
     """
     执行基本操作
     """
     
     #
-    # Step1. 找到游戏是否在主界面
+    
     width, height = pyautogui.size()
-    code_start = operate_gamestart(3)
-    code_ingame = operate_ingame(10)
+    code_start = operate_gamestart(3) # Step1. 找到游戏是否在主界面
+    
+    if code_start == 1:
+        code_ingame = operate_ingame(10) #%% Step2. 找到游戏是否在选人界面
+    
+    time.sleep(20) # pretend I am playing   
     code_ag = operate_ag(3)
         
-    #%% Step2. 找到游戏是否在选人界面
-    while True:
-        seeker = pyautogui.locateCenterOnScreen('.//pics//accept.png', confidence=0.8)
+    # 
+    
+    # pic_name = '1p'
+    
+    # while True:
+    #     # for pic_name in ['race', '1p', 'co']:
+    #     seeker_temp = pyautogui.locateCenterOnScreen('.//pics//sub_%s.png'%(pic_name), grayscale=True, confidence=0.8)
+    #     # if seeker_temp:
+    #     #         break
          
-        if seeker:
-            print('Yes!')
-        else:
-            print('No')
+    #     if seeker_temp:
+    #         print(pic_name)
+    #     else:
+    #         print('No')
             
-        time.sleep(1)
+    #     time.sleep(1)
         
-    #%%
-    while True:
-        pyautogui.press('c')
-        time.sleep(3)
-cc    #%%    
-    #%%    
-    while True:
-        pyautogui.write('Hello world!')
-        time.sleep(3)
+    # #%%
+    # while True:
+    #     # pyautogui.press('c')
+    #     pydirectinput.press('c')
+    #     time.sleep(3)
+        
+    # while True:
+    #     pyautogui.write('Hello world!')
+    #     time.sleep(3)
         
         
         
