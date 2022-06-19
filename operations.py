@@ -3,6 +3,50 @@ import time
 import pydirectinput
 
 
+class Hero(object):
+    def __init__(self, name, skills, press_key = ['z', 'x', 'c', 'v', 'b', 'n']):
+        """
+        name -> int 编队数字
+        skills -> list 技能名字
+        press_key -> list 键位
+        """
+        self.name = name
+        self.skills = skills
+        self.press_key = press_key
+        self.dict_key = dict(zip(skills, press_key))
+        
+    def h_choose(self): # 选中英雄
+        pydirectinput.press('5') # 视角居中
+        pydirectinput.press(str(self.name)) 
+        
+        
+    def h_move(self, coor): # 移动
+        x = coor[0]
+        y = coor[1]
+        pyautogui.moveTo(x, y)
+        time.sleep(0.5)
+        pyautogui.click(button='right') 
+        
+    
+    def h_build(self, coor): # 建造 
+        
+        x = coor[0]
+        y = coor[1]
+        button = self.dict_key['build']
+        pyautogui.moveTo(x, y)
+        time.sleep(0.5)
+        pydirectinput.press(button)
+        time.sleep(0.5)
+        pyautogui.click()   
+        
+    def h_destroy(self):
+        button = self.dict_key['destroy']
+        pass # 摧毁
+        
+    def h_skill(self):
+        pass # 特殊技能
+    
+    
 def operate_gamestart(pre_sleep, game_mode='1p'):
     """
     pre_sleep 为初始等待时间
@@ -142,50 +186,101 @@ def operate_ag(pre_sleep):
         operate_code = -1
         
     return operate_code
+
+
+def operate_camera(screen_name=5):
+    """
+    拉动视窗, 调节至合适;
+    给视野编队为 screnn
+    """
+    # Step1. 使用键盘方向键调节
+    time.sleep(2)    
+    pydirectinput.press('right')
+    time.sleep(0.5)
+    pydirectinput.press('down')
+    time.sleep(1)
     
+    # Step2. 一直 scoll down
+    time.sleep(1)
+    print('...')
+    i = 0
+    while i < 10:
+        i += 1
+        pyautogui.scroll(-1000)  # scroll down 10 "clicks"
+        
+    print('Camera in right location!')
     
+    pydirectinput.keyDown('ctrl')  # hold down the ctrl key
+    pydirectinput.press(str(screen_name)) # 编队
+    pydirectinput.keyUp('ctrl')    # release the ctrl key
+
+    
+
+def get_heros(game_mode):
+    """
+    实现对英雄的编队
+    （TBD）. 1p的编队
+    （TBD）. 英雄技能的识别
+    """
+    hero_list = []
+    if game_mode == '1p':
+        
+        pydirectinput.press('f1') # 选取英雄
+        pydirectinput.keyDown('ctrl')  # hold down the ctrl key
+        pydirectinput.press('1') # 编队
+        pydirectinput.keyUp('ctrl')    # release the ctrl key
+            
+        hero1 = Hero(1, ['build', 'destroy', 'none3', 'none4', 'none5', 'none6'])
+        hero_list.append(hero1)
+        
+    elif game_mode == 'co':
+        pass
+    else:
+        raise(ValueError)
+
+    return hero_list
+
+
+#%
 if __name__ == '__main__':
     """
     执行基本操作
     """
     
     #
+    code_start = 0
+    code_ingame = 0
+    game_mode = '1p'
+    
     
     width, height = pyautogui.size()
-    code_start = operate_gamestart(3) # Step1. 找到游戏是否在主界面
+    code_start = operate_gamestart(3, game_mode=game_mode) # Step1. 找到游戏是否在主界面
     
     if code_start == 1:
         code_ingame = operate_ingame(10) #%% Step2. 找到游戏是否在选人界面
     
-    time.sleep(20) # pretend I am playing   
+    if code_ingame == 1:
+        time.sleep(10) # 等待 10 秒游戏完成加载
+        pyautogui.click(x=width/2, y=height/2, clicks=2, duration=2) # 点击一下中心点进入游戏界面
+        heros_list = get_heros(game_mode=game_mode) # 选定英雄, 编队
+        operate_camera() # 调节视野大小
+    
+    # time.sleep(20) # pretend I am playing  
+    
+    #%%
     code_ag = operate_ag(3)
-        
-    # 
     
-    # pic_name = '1p'
     
-    # while True:
-    #     # for pic_name in ['race', '1p', 'co']:
-    #     seeker_temp = pyautogui.locateCenterOnScreen('.//pics//sub_%s.png'%(pic_name), grayscale=True, confidence=0.8)
-    #     # if seeker_temp:
-    #     #         break
-         
-    #     if seeker_temp:
-    #         print(pic_name)
-    #     else:
-    #         print('No')
-            
-    #     time.sleep(1)
+    
+    #%% (Temp use)
+    while True:
+        time.sleep(3)
+        print('Move')
+        pyautogui.moveTo(x=seeker_recorder[0], y=seeker_recorder[1])
+                    
         
-    # #%%
-    # while True:
-    #     # pyautogui.press('c')
-    #     pydirectinput.press('c')
-    #     time.sleep(3)
+    
         
-    # while True:
-    #     pyautogui.write('Hello world!')
-    #     time.sleep(3)
         
         
         
